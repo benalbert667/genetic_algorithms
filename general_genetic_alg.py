@@ -1,4 +1,4 @@
-from numpy.random import rand as random_array
+import numpy as np
 from random import random, choice
 
 
@@ -10,15 +10,16 @@ class GGA:
         self.check_fitness = success_function  # fitness function
 
         self.__population = self.__generate_random_population(len_output)
+        self.__best_individual = self.__population[0]
         self.__generation = 0
 
     def get_best_individual(self):
-        best = max(self.__population, key=self.check_fitness)
-        return best, self.check_fitness(best)  # returns both most successful individual and their fitness score
+        return self.__best_individual.copy(), self.check_fitness(self.__best_individual)
 
     def increment_generation(self, num_generations):
         for _ in range(num_generations):
             elite = self.__get_elite_of_population()
+            self.__best_individual = elite[0]  # set best individual
             p = elite.copy()  # elite continue into next population
             # fill rest of population with elite's children
             p.extend(self.__breed_random_parents(elite) for _ in range(int(self.ps * self.br)))
@@ -33,24 +34,22 @@ class GGA:
 
     # Creates a new child from two random parents
     def __breed_random_parents(self, parent_pool):
+
+
         p1 = choice(parent_pool)
         p2 = choice(parent_pool)
-        child = []
-        for i in range(len(p1)):
-            if random() < self.mr:
-                child.append(random())  # random mutation
-            elif random() < 0.5:  # select a parent to copy gene i from
-                child.append(p1[i])
-            else:
-                child.append(p2[i])
-        return child
+        child = np.random.rand(p1.size)
+        genes = np.random.rand(p1.size)
+        pct = (1 - self.mr)/2 + self.mr  # parent choice threshold
+        child = np.where(genes > pct, p1, child)  # genes from parent 1
+        return np.where((genes > self.mr) & (genes <= pct), p2, child)  # genes from parent 2, remainder are random
 
     # Gets the top br% of population by fitness
     def __get_elite_of_population(self):
         return sorted(self.__population,
                       key=lambda x: self.check_fitness(x),
-                      reverse=True)[0: int(self.ps * (1 - self.br))]
+                      reverse=True)[:int(self.ps * (1 - self.br))]
 
     # Generates a random population (2d array (population size by individual size) of random number 0 to 1)
     def __generate_random_population(self, individual_size):
-        return random_array(self.ps, individual_size).tolist()
+        return np.random.rand(self.ps, individual_size)

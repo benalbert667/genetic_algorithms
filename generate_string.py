@@ -1,4 +1,5 @@
 from general_genetic_alg import GGA
+import numpy as np
 
 
 def float_arr_to_string(a):
@@ -10,12 +11,11 @@ def main():
 
     goal = input('String to match: ')
 
+    max_score = len(goal)
+    goal = np.array(list(goal))
+
     def success_function(x):
-        score = 0
-        x = float_arr_to_string(x)
-        for a, b in zip(x, goal):
-            score += int(a == b)
-        return score
+        return np.sum(x == goal)
 
     ga = GGA(mutate_rate=0.01,
              breed_rate=0.75,
@@ -34,7 +34,7 @@ def main():
             float_arr_to_string(curr_best[0]),
             curr_best[1]
         ))
-        if float_arr_to_string(curr_best[0]) == goal:
+        if curr_best[1] == max_score:
             break
 
 
