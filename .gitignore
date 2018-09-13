@@ -1,5 +1,4 @@
-images/*
-.idea/*
+images
+.idea
 test.py
-__pyache__/*
-
+__pycache__
