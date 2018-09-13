@@ -1,4 +1,5 @@
 from general_genetic_alg import GGA
+import numpy as np
 
 
 def float_arr_to_string(a):
@@ -8,19 +9,17 @@ def float_arr_to_string(a):
 def main():
     print('*GENETIC ALGORITHM WITH STRINGS*')
 
-    goal = input('String to match: ')
+    goal_str = input('String to match: ')
+    goal = np.array(list(map(lambda c: (ord(c) - 32)/96.0, list(goal_str))))
 
     def success_function(x):
-        score = 0
-        x = float_arr_to_string(x)
-        for a, b in zip(x, goal):
-            score += int(a == b)
-        return score
+        comp = np.floor(x*96.0)/96.0
+        return np.sum(comp == goal)
 
     ga = GGA(mutate_rate=0.01,
              breed_rate=0.75,
              population_size=1000,
-             len_output=len(goal),
+             len_output=goal.size,
              success_function=success_function)
 
     print('With population size = {}\n{}% of population regenerated every generation\n{}% chance for a gene to mutate'
@@ -29,12 +28,12 @@ def main():
     while True:
         ga.increment_generation(1)
         curr_best = ga.get_best_individual()
-        print('Generation {}: \'{}\', score: {}'.format(
-            ga.get_current_generation(),
+        print('Generation {0:3}: \'{1}\', score: {2}'.format(
+            ga.get_num_generations(),
             float_arr_to_string(curr_best[0]),
             curr_best[1]
         ))
-        if float_arr_to_string(curr_best[0]) == goal:
+        if curr_best[1] == goal.size:
             break
 
 

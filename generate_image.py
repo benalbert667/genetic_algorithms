@@ -56,13 +56,13 @@ def main():
     while True:
         ga.increment_generation(1)
         curr_best = ga.get_best_individual()
-        print('Generation {} success: {}'.format(ga.get_current_generation(), curr_best[1]))
+        print('Generation {} success: {}'.format(ga.get_num_generations(), curr_best[1]))
         # im = flat_arr_to_image(curr_best[0], width, height)
         # im.show()
         if curr_best[1] >= 0:
             break
 
-    print('{} generations'.format(ga.get_current_generation()))
+    print('{} generations'.format(ga.get_num_generations()))
 
 
 if __name__ == '__main__':
