@@ -1,6 +1,7 @@
-from general_genetic_alg import GGA
+from .. import general_genetic_alg
 from PIL import Image
 import numpy as np
+GGA = general_genetic_alg.GGA
 
 
 def int_to_rgb(rgb_int):

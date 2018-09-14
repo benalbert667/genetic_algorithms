@@ -1,5 +1,6 @@
-from general_genetic_alg import GGA
+from .. import general_genetic_alg
 import numpy as np
+GGA = general_genetic_alg.GGA
 
 
 def float_arr_to_string(a):
