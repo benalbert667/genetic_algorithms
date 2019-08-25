@@ -1,6 +1,8 @@
-from .. import general_genetic_alg
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../')
+from general_genetic_alg import GGA
 import numpy as np
-GGA = general_genetic_alg.GGA
 
 
 def float_arr_to_string(a):
