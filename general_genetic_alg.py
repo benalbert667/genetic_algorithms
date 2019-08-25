@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.random import rand, shuffle
 from math import ceil
+import torch
 
 
 class GGA:
