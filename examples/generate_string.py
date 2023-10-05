@@ -1,8 +1,9 @@
 import sys
 import os
+import numpy as np
+from time import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../')
 from general_genetic_alg import GGA
-import numpy as np
 
 
 def float_arr_to_string(a):
@@ -19,17 +20,21 @@ def main():
         comp = np.floor(x*96.0)/96.0
         return np.sum(comp == goal)
 
+    init_timer = time()
+
     ga = GGA(mutate_rate=0.01,
              breed_rate=0.75,
-             population_size=1000,
+             population_size=10000,
              len_output=goal.size,
              success_function=success_function)
 
-    print('With population size = {}\n{}% of population regenerated every generation\n{}% chance for a gene to mutate'
-          .format(ga.ps, ga.br * 100, ga.mr * 100))
+    print('With population size = {}\n{}% of population regenerated every generation\n{}% chance for a gene to '
+          'mutate\nGGA initialized in {:.3f} seconds'
+          .format(ga.ps, ga.br * 100, ga.mr * 100, time() - init_timer))
+
+    process_timer = time()
 
     while True:
-        ga.increment_generation(1)
         curr_best = ga.get_best_individual()
         print('Generation {0:3}: \'{1}\', score: {2}'.format(
             ga.get_num_generations(),
@@ -38,6 +43,11 @@ def main():
         ))
         if curr_best[1] == goal.size:
             break
+        ga.increment_generation(1)
+
+    process_timer = time() - process_timer
+    print('Processed in {:.2f} seconds ({:.3f} seconds per generation)'
+          .format(process_timer, process_timer / ga.get_num_generations()))
 
 
 if __name__ == '__main__':
