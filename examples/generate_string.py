@@ -29,8 +29,8 @@ def main():
              success_function=success_function)
 
     print('With population size = {}\n{}% of population regenerated every generation\n{}% chance for a gene to '
-          'mutate\nGGA initialized in {:.3f} seconds, {:.2f} MB in memory'
-          .format(ga.ps, ga.br * 100, ga.mr * 100, time() - init_timer, sys.getsizeof(ga) / 2**20))
+          'mutate\nGGA initialized in {:.3f} seconds'
+          .format(ga.ps, ga.br * 100, ga.mr * 100, time() - init_timer))
 
     process_timer = time()
 
