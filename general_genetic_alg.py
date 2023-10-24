@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.random import rand, shuffle
-from random import random
+from numpy.random import rand
 from math import ceil
+from time import time
 
 
 class GGA:
@@ -14,7 +14,6 @@ class GGA:
 
         self.__population = GAHeap(self.ps, self.check_fitness)  # entire population
         self.__init_population()
-        # self.__best_individuals = None  # sorted list of top (1-br)% individuals
         self.__generation = 0
 
     def get_best_individual(self):
@@ -22,65 +21,34 @@ class GGA:
         return self.__population.get_max()
 
     def increment_generation(self, num_generations):
-        # if self.__generation == 0:
-        #     self.__best_individuals = self.__get_elite_of_population()
         for _ in range(num_generations):
-            self.__breed_random_parents()
+            self.__breed_elite()
             self.__generation += 1
-            # self.__best_individuals = self.__get_elite_of_population()
 
     def get_num_generations(self):
         return self.__generation
 
-    def __breed_random_parents(self):
-        num_elites = int(self.ps * (1 - self.br))
-        elites = [self.__population.delete_max() for _ in range(num_elites)]
-
-        # proportional ranges based on score from 1 to self.mr
-        ess = sum(e[1] for e in elites)  # elite score sum
-        ppoi = np.cumsum([(e[1] / ess) * (1 - self.mr) for e in elites])  # proportional probabilities of inheritance
-
+    def __breed_elite(self):
+        num_elites = ceil(self.ps * (1 - self.br))
+        elites, elite_scores = [], []
+        for _ in range(num_elites):
+            e, s = self.__population.delete_max()
+            elites.append(e)
+            elite_scores.append(s)
+        elites = np.array(elites + [rand(self.os)])
+        elite_scores = np.array(elite_scores)
         self.__population.clear_heap()
 
-        for _ in range(self.ps - num_elites):
-            ga = rand(self.os)
-            indv = rand(self.os)
-            for i in range(self.os):
-                j = np.searchsorted(ppoi, ga[i])
-                if j < num_elites:
-                    indv[i] = elites[j][0][i]
-            self.__population.insert(indv)
+        # proportional ranges based on score from 1 to self.mr
+        ppoi = np.cumsum(elite_scores) / elite_scores.sum() * (1 - self.mr)  # proportional probabilities of inheritance
 
-        while elites:
-            self.__population.insert(elites.pop()[0])
+        # gene assignments, each value at i,j is the index of the elite that the gene at i,j should be inherited from
+        ga = np.searchsorted(ppoi, rand(self.ps - num_elites, self.os))
+        ga = np.diagonal(elites[ga], axis1=1, axis2=2)
+        ga = list(np.concatenate((ga, elites[:-1])))
 
-
-
-        # ga = rand(*self.__population.shape)  # Gene assignments
-        # # Create parent pool from current elite of population
-        # parents = np.repeat(self.__best_individuals, int(ceil((1 / (1 - self.br)))), axis=0)
-        # shuffle(parents)
-        # # Resize parents to population's size (cutting off a random selection of repeated parents)
-        # parents = parents[:self.__population.shape[0]]
-        #
-        # # Create mother and father populations
-        # mothers = parents.copy()
-        # shuffle(parents)
-        # fathers = parents.copy()
-        #
-        # # Parent Choice Threshold: Used to determine which parent a child should inherit a gene from
-        # pct = (1 - self.mr) / 2 + self.mr
-        # # Wipe current population
-        # self.__population = rand(*self.__population.shape)
-        # # Inherit genes randomly from either the father or the mother gene pools (or randomly mutate)
-        # self.__population = np.where((ga > self.mr) & (ga <= pct), fathers,
-        #                              np.where(ga > pct, mothers, self.__population))
-        # # Re-introduce previous generation's elite into population
-        # self.__population[:self.__best_individuals.shape[0]] = self.__best_individuals
-
-    # def __get_elite_of_population(self):
-    #     # Get the top (1-br)% of population by fitness
-    #     return np.array(sorted(self.__population, key=self.check_fitness))[-int(self.ps*(1-self.br)):]
+        while ga:
+            self.__population.insert(ga.pop())
 
     def __init_population(self):
         for _ in range(self.ps):
