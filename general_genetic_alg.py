@@ -13,7 +13,7 @@ class GGA:
         self.check_fitness = success_function  # fitness function (higher result = more fit)
 
         self.__population = GAHeap(self.ps, self.check_fitness)  # entire population
-        self.__init_population()
+        self.__init_population()  # initialize the population randomly
         self.__generation = 0
 
     def get_best_individual(self):
@@ -29,24 +29,37 @@ class GGA:
         return self.__generation
 
     def __breed_elite(self):
+        # retrieve the elite of the population from the heap
         num_elites = ceil(self.ps * (1 - self.br))
         elites, elite_scores = [], []
         for _ in range(num_elites):
             e, s = self.__population.delete_max()
             elites.append(e)
             elite_scores.append(s)
+
+        # add a random individual to the elite that the next generation will inherit as mutations
         elites = np.array(elites + [rand(self.os)])
         elite_scores = np.array(elite_scores)
+        
+        # delete the current population
         self.__population.clear_heap()
 
-        # proportional ranges based on score from 1 to self.mr
-        ppoi = np.cumsum(elite_scores) / elite_scores.sum() * (1 - self.mr)  # proportional probabilities of inheritance
+        # Proportional probabilities of inheritance:
+        # these values will determine the likelihood that an individual in the next generation will inherit
+        # a gene from any one elite.  the likelihood is scaled linearly by the elite's fitness
+        ppoi = np.cumsum(elite_scores) / elite_scores.sum() * (1 - self.mr)
 
-        # gene assignments, each value at i,j is the index of the elite that the gene at i,j should be inherited from
+        # create random gene assignments for each new individual based on the proportional probabilities
+        # ga will be a matrix of indices where each index is the index of the elite that gene will be inherited from
         ga = np.searchsorted(ppoi, rand(self.ps - num_elites, self.os))
+
+        # inherit the selected genes
         ga = np.diagonal(elites[ga], axis1=1, axis2=2)
+
+        # make a pop-able list of all the individuals moving on to the next generation
         ga = list(np.concatenate((ga, elites[:-1])))
 
+        # add all individuals back in to the empty heap
         while ga:
             self.__population.insert(ga.pop())
 
