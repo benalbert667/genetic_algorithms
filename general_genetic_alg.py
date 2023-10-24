@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.random import rand
 from math import ceil
-from time import time
 
 
 class GGA:
@@ -40,7 +39,7 @@ class GGA:
         # add a random individual to the elite that the next generation will inherit as mutations
         elites = np.array(elites + [rand(self.os)])
         elite_scores = np.array(elite_scores)
-        
+
         # delete the current population
         self.__population.clear_heap()
 
