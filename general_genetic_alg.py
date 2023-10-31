@@ -4,7 +4,7 @@ from math import ceil
 
 
 class GGA:
-    def __init__(self, mutate_rate, breed_rate, population_size, len_output, success_function):
+    def __init__(self, mutate_rate, breed_rate, population_size, len_output, success_function, with_individuals=()):
         self.mr = mutate_rate  # chance for a gene to mutate
         self.br = breed_rate  # percent of population that is cycled per generation
         self.ps = population_size  # size of population
@@ -12,7 +12,7 @@ class GGA:
         self.check_fitness = success_function  # fitness function (higher result = more fit)
 
         self.__population = GAHeap(self.ps, self.check_fitness)  # entire population
-        self.__init_population()  # initialize the population randomly
+        self.__init_population(with_individuals)  # initialize the population randomly
         self.__generation = 0
 
     def get_best_individual(self):
@@ -62,8 +62,10 @@ class GGA:
         while ga:
             self.__population.insert(ga.pop())
 
-    def __init_population(self):
-        for _ in range(self.ps):
+    def __init_population(self, include):
+        for indv in include:
+            self.__population.insert(indv)
+        for _ in range(self.ps - len(include)):
             self.__population.insert(rand(self.os))
 
 
